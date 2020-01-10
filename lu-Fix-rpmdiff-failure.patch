@@ -1,0 +1,54 @@
+From 523a2457fb0206a5a1cfd4259512b3fc8bbe8905 Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Thu, 18 Jun 2015 11:42:44 +0200
+Subject: [PATCH 1/2] Fix rpmdiff failure
+
+Message-id: <1434620565-7304-1-git-send-email-pbonzini@redhat.com>
+Patchwork-id: 66323
+O-Subject: [RHEL7.2 PATCH libunwind] Fix rpmdiff failure
+Bugzilla: 1229359
+RH-Acked-by: Miroslav Rezanina <mrezanin@redhat.com>
+RH-Acked-by: Jeff Nelson <jenelson@redhat.com>
+
+This fixes an rpmdiff failure for libunwind.  It is possible to build
+a cross libunwind to e.g. work on ARM memory from x86.  Because of this,
+the libunwind.h file differs across architectures and rpmdiff complains
+because it is installed in /usr/include.
+
+RHEL never does cross libunwinds, so just drop the faulty include
+statement.
+---
+ include/libunwind.h.in | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/include/libunwind.h.in b/include/libunwind.h.in
+index 64b1457..58b7934 100644
+--- a/include/libunwind.h.in
++++ b/include/libunwind.h.in
+@@ -1,7 +1,11 @@
+ /* Provide a real file - not a symlink - as it would cause multiarch conflicts
+    when multiple different arch releases are installed simultaneously.  */
+ 
+-#ifndef UNW_REMOTE_ONLY
++/* Fedora/RHEL does not cross-compile libunwind, so always use direct
++ * inclusion.  It handles multilib better.
++ */
++#ifndef LIBUNWIND_INCLUDE_H
++#define LIBUNWIND_INCLUDE_H 1
+ 
+ #if defined __aarch64__
+ #include "libunwind-aarch64.h"
+@@ -26,9 +30,4 @@
+ #else
+ # error "Unsupported arch"
+ #endif
+-
+-#else /* UNW_REMOTE_ONLY */
+-
+-# include "libunwind-@arch@.h"
+-
+-#endif /* UNW_REMOTE_ONLY */
++#endif /* LIBUNWIND_INCLUDE_H */
+-- 
+2.4.3
+
