@@ -2,9 +2,6 @@ include_HEADERS = include/libunwind-dynamic.h \
     include/libunwind-ptrace.h \
     include/libunwind-coredump.h
 
-if ARCH_AARCH64
-include_HEADERS += include/libunwind-aarch64.h
-endif
 if ARCH_ARM
 include_HEADERS += include/libunwind-arm.h
 endif
@@ -16,9 +13,6 @@ include_HEADERS += include/libunwind-hppa.h
 endif
 if ARCH_MIPS
 include_HEADERS += include/libunwind-mips.h
-endif
-if ARCH_TILEGX
-include_HEADERS += include/libunwind-tilegx.h
 endif
 if ARCH_X86
 include_HEADERS += include/libunwind-x86.h
@@ -42,18 +36,11 @@ endif
 
 nodist_include_HEADERS = include/libunwind-common.h
 
-SUBDIRS = src tests
-
-if CONFIG_DOCS
-SUBDIRS += doc
-endif
+SUBDIRS = src tests doc
 
 noinst_HEADERS = include/dwarf.h include/dwarf_i.h include/dwarf-eh.h	\
 	include/compiler.h include/libunwind_i.h include/mempool.h	\
 	include/remote.h						\
-	include/tdep-aarch64/dwarf-config.h				\
-	include/tdep-aarch64/jmpbuf.h					\
-	include/tdep-aarch64/libunwind_i.h				\
 	include/tdep-arm/dwarf-config.h	include/tdep-arm/ex_tables.h	\
 	include/tdep-arm/jmpbuf.h include/tdep-arm/libunwind_i.h	\
 	include/tdep-ia64/jmpbuf.h include/tdep-ia64/rse.h 		\
@@ -62,8 +49,6 @@ noinst_HEADERS = include/dwarf.h include/dwarf_i.h include/dwarf-eh.h	\
 	include/tdep-hppa/jmpbuf.h include/tdep-hppa/dwarf-config.h	\
 	include/tdep-mips/libunwind_i.h					\
 	include/tdep-mips/jmpbuf.h include/tdep-mips/dwarf-config.h	\
-	include/tdep-tilegx/libunwind_i.h				\
-	include/tdep-tilegx/jmpbuf.h include/tdep-tilegx/dwarf-config.h	\
 	include/tdep-x86/libunwind_i.h					\
 	include/tdep-x86/jmpbuf.h include/tdep-x86/dwarf-config.h	\
 	include/tdep-x86_64/libunwind_i.h				\
@@ -93,4 +78,3 @@ MAINTAINERCLEANFILES = \
 	config/missing \
 	include/config.h.in \
 	include/config.h.in~
-

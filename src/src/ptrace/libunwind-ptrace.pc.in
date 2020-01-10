@@ -8,4 +8,3 @@ Description: libunwind ptrace library
 Version: @VERSION@
 Requires: libunwind-generic libunwind
 Libs: -L${libdir} -lunwind-ptrace
-Cflags: -I${includedir}
