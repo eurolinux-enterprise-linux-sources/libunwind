@@ -36,7 +36,7 @@ if USE_ALTIVEC
 endif #USE_ALTIVEC
 endif #ARCH_PPC64
 endif #!ARCH_IA64
- check_SCRIPTS_cdep =	run-ptrace-mapper run-ptrace-misc
+ check_SCRIPTS_cdep =
  check_PROGRAMS_cdep =	Gtest-bt Ltest-bt Gtest-exc Ltest-exc		 \
 			Gtest-init Ltest-init				 \
 			Gtest-concurrent Ltest-concurrent		 \
@@ -45,12 +45,20 @@ endif #!ARCH_IA64
 			Gtest-dyn1 Ltest-dyn1				 \
 			Gtest-trace Ltest-trace				 \
 			test-async-sig test-flush-cache test-init-remote \
-			test-mem test-setjmp test-ptrace Ltest-varargs	 \
-			Ltest-nomalloc Ltest-nocalloc Lrs-race
- noinst_PROGRAMS_cdep = forker crasher mapper test-ptrace-misc		 \
-			Gperf-simple Lperf-simple
+			test-mem Ltest-varargs Ltest-nomalloc	 \
+			Ltest-nocalloc Lrs-race
+ noinst_PROGRAMS_cdep = forker Gperf-simple Lperf-simple \
+			Gperf-trace Lperf-trace
 
- noinst_PROGRAMS_cdep += Gperf-trace Lperf-trace
+if BUILD_PTRACE
+ check_SCRIPTS_cdep += run-ptrace-mapper run-ptrace-misc
+ check_PROGRAMS_cdep += test-ptrace
+ noinst_PROGRAMS_cdep += mapper test-ptrace-misc
+endif
+
+if BUILD_SETJMP
+ check_PROGRAMS_cdep += test-setjmp
+endif
 
 if SUPPORT_CXX_EXCEPTIONS
  check_PROGRAMS_cdep += Ltest-cxx-exceptions
@@ -59,7 +67,7 @@ endif
 if OS_LINUX
 if BUILD_COREDUMP
  check_SCRIPTS_cdep += run-coredump-unwind
- noinst_PROGRAMS_cdep += test-coredump-unwind
+ noinst_PROGRAMS_cdep += crasher test-coredump-unwind
 
 if HAVE_LZMA
  check_SCRIPTS_cdep += run-coredump-unwind-mdi
@@ -86,6 +94,24 @@ check_SCRIPTS =	$(check_SCRIPTS_common) $(check_SCRIPTS_cdep) \
 
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
+XFAIL_TESTS =
+
+if !ARCH_IA64
+XFAIL_TESTS += Gtest-dyn1 Ltest-dyn1
+endif
+
+# Use if arch defines but does not support PTRACE_SINGLESTEP
+# ptrace request used in the tests.
+XFAIL_TESTS_PTRACE_SINGLESTEP = run-ptrace-mapper run-ptrace-misc
+
+if ARCH_MIPS
+XFAIL_TESTS += $(XFAIL_TESTS_PTRACE_SINGLESTEP)
+endif
+
+if ARCH_ARM
+# ARM Linux kernel >=2.6.39 removed PTRACE_SINGLESTEP emulation
+XFAIL_TESTS += $(XFAIL_TESTS_PTRACE_SINGLESTEP)
+endif
 
 noinst_PROGRAMS = $(noinst_PROGRAMS_common) $(noinst_PROGRAMS_cdep) \
 	$(noinst_PROGRAMS_arch)
@@ -189,3 +215,4 @@ Lia64_test_rbs_LDADD = $(LIBUNWIND_local)
 Lia64_test_readonly_LDADD = $(LIBUNWIND_local)
 ia64_test_dyn1_LDADD = $(LIBUNWIND)
 ia64_test_sig_LDADD = $(LIBUNWIND)
+ppc64_test_altivec_LDADD = $(LIBUNWIND)

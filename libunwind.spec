@@ -4,19 +4,16 @@
 Summary: An unwinding library
 Name: libunwind
 Epoch: 2
-Version: 1.1
-Release: 5%{?dist}.2
+Version: 1.2
+Release: 2%{?dist}
 License: BSD
 Group: Development/Debuggers
 Source: http://download.savannah.gnu.org/releases/libunwind/libunwind-%{version}.tar.gz
-#Fedora specific patch
-Patch1: libunwind-disable-setjmp.patch
-Patch2: libunwind-aarch64.patch
-Patch3: libunwind-fix-ppc64_test_altivec.patch
-Patch4: lu-Fix-rpmdiff-failure.patch
-Patch5: lu-Fix-buffer-overflow-reported-by-Coverity.patch
+
+Patch2: 0002-Fix-rpmdiff-failure.patch
+
 URL: http://savannah.nongnu.org/projects/libunwind
-ExclusiveArch: %{arm} aarch64 %{ix86} x86_64
+ExclusiveArch: %{arm} aarch64 %{ix86} x86_64 %{power64}
 
 BuildRequires: automake libtool autoconf
 
@@ -37,11 +34,8 @@ libunwind.
 
 %prep
 %setup -q
-%patch1 -p1
+
 %patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
 
 %build
 aclocal
@@ -49,7 +43,7 @@ libtoolize --force
 autoheader
 automake --add-missing
 autoconf
-%configure --enable-static --enable-shared
+%configure --enable-static --enable-shared --disable-setjmp
 make %{?_smp_mflags}
 
 %install
@@ -63,6 +57,14 @@ mv -f $RPM_BUILD_ROOT%{_libdir}/libunwind-ptrace.a $RPM_BUILD_ROOT%{_libdir}/lib
 rm -f $RPM_BUILD_ROOT%{_libdir}/libunwind*.a
 mv -f $RPM_BUILD_ROOT%{_libdir}/libunwind-ptrace.a-save $RPM_BUILD_ROOT%{_libdir}/libunwind-ptrace.a
 rm -f $RPM_BUILD_ROOT%{_libdir}/libunwind-ptrace*.so*
+
+#Copy doc files manually as we do not have latex2man in Red Hat Enterprise Linux
+mkdir -p $RPM_BUILD_ROOT%{_mandir}/man3
+cd doc
+for fn in *.man; do
+  install -c -m 644 $fn $RPM_BUILD_ROOT%{_mandir}/man3/${fn%.man}.3
+done
+cd ..
 
 %check
 %if 0%{?_with_check:1} || 0%{?_with_testsuite:1}
@@ -87,18 +89,23 @@ echo ====================TESTSUITE DISABLED=========================
 %{_libdir}/libunwind*.so
 %{_libdir}/libunwind-ptrace.a
 %{_libdir}/pkgconfig/libunwind*.pc
-%{_mandir}/*/*
+%{_mandir}/man3/*
 # <unwind.h> does not get installed for REMOTE_ONLY targets - check it.
 %{_includedir}/unwind.h
 %{_includedir}/libunwind*.h
 
 %changelog
-* Thu Jan 28 2016 Miroslav Rezanina <mrezanin@redhat.com> 1.2-5.el7_2.2
+* Mon Feb 27 2017 Miroslav Rezanina <mrezanin@redhat.com> 1.2-2.el7
+- Rebase to 1.2 [bz#1384435]
+- Resolves: bz#1384435
+  (Rebase libunwind package (and add for ppc64le): libunwind)
+
+* Thu Jan 28 2016 Miroslav Rezanina <mrezanin@redhat.com> 1.1-6.el7
 - Fix update from EPEL version [bz#1289950]
 - Resolves: bz#1289950
   (libunwind in RHEL 7.2 has a smaller release than the last libunwind package in EPEL-7)
 
-* Wed Jul 29 2015 Miroslav Rezanina <mrezanin@redhat.com> 1.2-5
+* Wed Jul 29 2015 Miroslav Rezanina <mrezanin@redhat.com> 1.1-5
 - Version bumped [bz#1238864]
 - Resolves: bz#1238864
   libunwind: bump version to win against existing branches

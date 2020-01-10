@@ -39,11 +39,17 @@ _UCD_access_reg (unw_addr_space_t as,
       return -UNW_EINVAL;
     }
 
-#if defined(UNW_TARGET_ARM)
+#if defined(UNW_TARGET_AARCH64)
+  if (regnum < 0 || regnum >= UNW_AARCH64_FPCR)
+    goto badreg;
+#elif defined(UNW_TARGET_ARM)
   if (regnum < 0 || regnum >= 16)
     goto badreg;
 #elif defined(UNW_TARGET_SH)
   if (regnum < 0 || regnum > UNW_SH_PR)
+    goto badreg;
+#elif defined(UNW_TARGET_TILEGX)
+  if (regnum < 0 || regnum > UNW_TILEGX_CFA)
     goto badreg;
 #else
 #if defined(UNW_TARGET_MIPS)
@@ -124,8 +130,8 @@ _UCD_access_reg (unw_addr_space_t as,
    * image.
    */
   Debug(1, "pr_reg[%d]:%ld (0x%lx)\n", regnum,
-		(long)ui->prstatus->pr_reg[regnum],
-		(long)ui->prstatus->pr_reg[regnum]
+                (long)ui->prstatus->pr_reg[regnum],
+                (long)ui->prstatus->pr_reg[regnum]
   );
   *valp = ui->prstatus->pr_reg[regnum];
 

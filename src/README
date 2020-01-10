@@ -9,18 +9,19 @@ several architecture/operating-system combinations:
  Linux/IA-64:	Fully tested and supported.
  Linux/PARISC:	Works well, but C library missing unwind-info.
  HP-UX/IA-64:	Mostly works but known to have some serious limitations.
+ Linux/AArch64:	Newly added.
  Linux/PPC64:	Newly added.
  Linux/SuperH:	Newly added.
  FreeBSD/i386:	Newly added.
  FreeBSD/x86-64: Newly added (FreeBSD architecture is known as amd64).
-
+ Linux/Tilegx:  Newly added (64-bit mode only).
 
 * General Build Instructions
 
 In general, this library can be built and installed with the following
 commands:
 
-	$ autoreconf -i # Needed only for building from git. Depends on libtool.
+	$ ./autogen.sh # Needed only for building from git. Depends on libtool.
 	$ ./configure
 	$ make
 	$ make install prefix=PREFIX
